@@ -1,27 +1,28 @@
 import mercadopago
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from django.http import HttpResponse, JsonResponse
+from rest_framework import status
 from django.conf import settings
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
+from .serializers import PurchaseSerializer
+from payments.models import Purchase
 
 class MercadoPagoCreatePreferenceView(APIView):
     def post(self, request):
-        try:
-            descripcion = request.data.get('descripcion', '')
-            precio = float(request.data.get('precio', 0))
-            cantidad = int(request.data.get('cantidad', 1))
+        serializer = PurchaseSerializer(data=request.data)
 
+        if serializer.is_valid():
+            data = serializer.validated_data
             sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
             preference_data = {
                 "items": [
                     {
-                        "title": descripcion,
-                        "quantity": cantidad,
-                        "unit_price": precio,
+                        "title": data["description"],
+                        "quantity": data["quantity"],
+                        "unit_price": float(data["price"]),
                         "currency_id": "MXN"
                     }
                 ],
@@ -33,29 +34,33 @@ class MercadoPagoCreatePreferenceView(APIView):
                 "auto_return": "approved"
             }
 
-            preference = sdk.preference().create(preference_data)
-            response_data = preference.get("response", {})
+            try:
+                preference = sdk.preference().create(preference_data)
+                response_data = preference.get("response", {})
 
-            if response_data and "init_point" in response_data:
-                return Response({"init_point": response_data["init_point"]})
-            else:
+                if "init_point" in response_data:
+                    purchase = serializer.save(
+                        status='pending',
+                        preference_id=response_data.get("id", "")
+                    )
+                    return Response({"init_point": response_data["init_point"]})
+                else:
+                    return Response({
+                        "error": "No se generó el link de pago",
+                        "detalle": response_data
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+            except Exception as e:
                 return Response({
-                    "error": "No se generó el link de pago",
-                    "detalle": response_data
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({
-                "error": "Error al crear la preferencia",
-                "detalle": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    "error": "Error al crear la preferencia",
+                    "detalle": str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @csrf_exempt
 def checkout_pro(request):
-    """
-    Versión con redirección automática a MercadoPago Checkout Pro
-    """
     try:
         sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
 
