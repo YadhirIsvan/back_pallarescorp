@@ -4,12 +4,3 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn backend.wsgi:application --log-file -
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: ${DJANGO_SETTINGS_MODULE}
-      - key: SECRET_KEY
-        value: ${SECRET_KEY}
-      - key: DEBUG
-        value: ${DEBUG}
-      - key: MERCADOPAGO_ACCESS_TOKEN
-        value: ${MERCADOPAGO_ACCESS_TOKEN}
