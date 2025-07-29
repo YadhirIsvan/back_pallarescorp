@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .serializers import PurchaseSerializer
 from payments.models import Purchase
 
+
 class MercadoPagoCreatePreferenceView(APIView):
     def post(self, request):
         serializer = PurchaseSerializer(data=request.data)
@@ -26,6 +27,10 @@ class MercadoPagoCreatePreferenceView(APIView):
                         "currency_id": "MXN"
                     }
                 ],
+                "payer": {
+                    # ⚠️ IMPORTANTE: cambiar este correo por el del usuario autenticado o uno de test válido
+                    "email": data.get("email", "test_user_123456@testuser.com")
+                },
                 "back_urls": {
                     "success": "https://pallares-corp-tau.vercel.app/success",
                     "failure": "https://pallares-corp-tau.vercel.app/failure",
@@ -39,6 +44,7 @@ class MercadoPagoCreatePreferenceView(APIView):
                 response_data = preference.get("response", {})
 
                 if "init_point" in response_data:
+                    # Guarda la compra con el preference_id
                     purchase = serializer.save(
                         status='pending',
                         preference_id=response_data.get("id", "")
@@ -74,6 +80,7 @@ def checkout_pro(request):
                 }
             ],
             "payer": {
+                # ⚠️ Usa un correo válido de usuario de pruebas de MercadoPago
                 "email": "test_user_123456@testuser.com"
             },
             "back_urls": {
