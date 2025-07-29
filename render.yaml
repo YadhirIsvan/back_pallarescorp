@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: payments-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn payments.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: backend.settings
+      - key: SECRET_KEY
+        value: @5zbjp*1m20!hc^)2io!sr368@2-o49z@7t&h_-7#pe1a*9y38
+      - key: DEBUG
+        value: False
