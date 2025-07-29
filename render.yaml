@@ -6,8 +6,10 @@ services:
     startCommand: gunicorn backend.wsgi:application
     envVars:
       - key: DJANGO_SETTINGS_MODULE
-        value: backend.settings
+        value: ${DJANGO_SETTINGS_MODULE}
       - key: SECRET_KEY
-        value: @5zbjp*1m20!hc^)2io!sr368@2-o49z@7t&h_-7#pe1a*9y38
+        value: ${SECRET_KEY}
       - key: DEBUG
-        value: False
+        value: ${DEBUG}
+      - key: MERCADOPAGO_ACCESS_TOKEN
+        value: ${MERCADOPAGO_ACCESS_TOKEN}
