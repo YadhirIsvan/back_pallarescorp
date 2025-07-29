@@ -3,7 +3,7 @@ services:
     name: payments-backend
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn backend.wsgi:application
+    startCommand: gunicorn backend.wsgi:application --log-file -
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: ${DJANGO_SETTINGS_MODULE}
