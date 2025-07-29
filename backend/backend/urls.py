@@ -16,9 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse 
+# Esta es la función que responderá a la raíz "/"
+def home(request):
+    return HttpResponse("✅ Backend PallaresCorp corriendo correctamente!")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('payments/', include('payments.urls')),  # Esto activa la app 'payments'
+    path('payments/', include('payments.urls')),  # Esto activa la app 'payments',
+    path('', home),
 
 ]
