@@ -14,10 +14,8 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 MERCADOPAGO_ACCESS_TOKEN = config('MERCADOPAGO_ACCESS_TOKEN')
 
 # Hosts
-ALLOWED_HOSTS = [
-    'pallares-back.onrender.com',
-    'www.pallarescorp.com',
-]
+ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
+
 
 CORS_ALLOWED_ORIGINS = [
     "https://www.pallarescorp.com",
