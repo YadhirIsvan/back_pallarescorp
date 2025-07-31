@@ -28,15 +28,14 @@ class MercadoPagoCreatePreferenceView(APIView):
                     }
                 ],
                 "payer": {
-                    # ⚠️ IMPORTANTE: cambiar este correo por el del usuario autenticado o uno de test válido
                     "email": data.get("email", "test_user_123456@testuser.com")
                 },
                 "back_urls": {
                     "success": "https://pallares-corp-tau.vercel.app/success",
                     "failure": "https://pallares-corp-tau.vercel.app/failure",
                     "pending": "https://pallares-corp-tau.vercel.app/pending"
-                },
-                "auto_return": "approved"
+                }
+                # ❌ auto_return eliminado para mostrar el comprobante antes de redirigir
             }
 
             try:
@@ -44,7 +43,6 @@ class MercadoPagoCreatePreferenceView(APIView):
                 response_data = preference.get("response", {})
 
                 if "init_point" in response_data:
-                    # Guarda la compra con el preference_id
                     purchase = serializer.save(
                         status='pending',
                         preference_id=response_data.get("id", "")
@@ -80,15 +78,14 @@ def checkout_pro(request):
                 }
             ],
             "payer": {
-                # ⚠️ Usa un correo válido de usuario de pruebas de MercadoPago
                 "email": "test_user_123456@testuser.com"
             },
             "back_urls": {
                 "success": "https://pallares-corp-tau.vercel.app/success",
                 "failure": "https://pallares-corp-tau.vercel.app/failure",
                 "pending": "https://pallares-corp-tau.vercel.app/pending"
-            },
-            "auto_return": "approved"
+            }
+            # ❌ auto_return eliminado
         }
 
         preference_response = sdk.preference().create(preference_data)
@@ -113,3 +110,43 @@ def pago_fallido(request):
 
 def pago_pendiente(request):
     return HttpResponse("⏳ Pago pendiente...")
+
+
+# NUEVO ENDPOINT para actualizar el estado desde el frontend
+class MercadoPagoUpdateStatusView(APIView):
+    def post(self, request):
+        preference_id = request.data.get("preference_id")
+        status_pago = request.data.get("status", "approved").lower()
+
+        estados_validos = ['approved', 'pending', 'rejected', 'cancelled']
+
+        if not preference_id:
+            return Response({"error": "preference_id es requerido"}, status=400)
+
+        if status_pago not in estados_validos:
+            return Response({"error": f"Estado inválido. Debe ser uno de {estados_validos}"}, status=400)
+
+        try:
+            purchase = Purchase.objects.get(preference_id=preference_id)
+
+            # Verificar con MercadoPago el estado real antes de actualizar:
+            sdk = mercadopago.SDK(settings.MERCADOPAGO_ACCESS_TOKEN)
+            payment_search = sdk.payment().search({"external_reference": preference_id})
+            payments = payment_search.get("response", {}).get("results", [])
+
+            if payments:
+                payment_status = payments[0].get("status")
+                if payment_status != status_pago:
+                    return Response({
+                        "error": f"Estado real del pago en MercadoPago es '{payment_status}', no coincide con '{status_pago}'"
+                    }, status=400)
+
+            # Actualizar solo si coincide o no se pudo validar
+            purchase.status = status_pago
+            purchase.save()
+            return Response({"message": "Estado actualizado correctamente"})
+
+        except Purchase.DoesNotExist:
+            return Response({"error": "Compra no encontrada"}, status=404)
+        except Exception as e:
+            return Response({"error": f"Error interno: {str(e)}"}, status=500)

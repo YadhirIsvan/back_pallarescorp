@@ -6,7 +6,8 @@ from .views import (
     checkout_pro,
     pago_exitoso,
     pago_fallido,
-    pago_pendiente
+    pago_pendiente,
+    MercadoPagoUpdateStatusView 
 )
 
 urlpatterns = [
@@ -15,4 +16,6 @@ urlpatterns = [
     path('pago-exitoso/', pago_exitoso, name='pago_exitoso'),
     path('pago-fallido/', pago_fallido, name='pago_fallido'),
     path('pago-pendiente/', pago_pendiente, name='pago_pendiente'),
+    path('actualizar-estado/', MercadoPagoUpdateStatusView.as_view(), name='actualizar-estado'),  # ⬅️ nuevo endpoint
+
 ]
