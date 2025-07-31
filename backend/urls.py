@@ -24,6 +24,6 @@ def home(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('payments/', include('payments.urls')),  # Esto activa la app 'payments',
-    path('', home),
+    path('/', home),
 
 ]
