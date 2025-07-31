@@ -15,7 +15,7 @@ services:
       - key: DATABASE_URL
         value: postgres://pallares_user:8IdBB3JZ6Wo0rFIrpbQSrUolk86UhHj5@dpg-d25caj7diees73aujqrg-a.oregon-postgres.render.com/mi_db_pallarescorp
       - key: PYTHON_VERSION
-        value: 3.11
+        value: 3.13
       - key: DJANGO_SETTINGS_MODULE
         value: backend.settings
       - key: SECRET_KEY
