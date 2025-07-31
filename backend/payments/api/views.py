@@ -28,7 +28,7 @@ class MercadoPagoCreatePreferenceView(APIView):
                     }
                 ],
                 "payer": {
-                    "email": data.get("email", "test_user_123456@testuser.com")
+                    "email": data.get("email", "")
                 },
                 "back_urls": {
                     "success": "https://pallares-corp-tau.vercel.app/success",
