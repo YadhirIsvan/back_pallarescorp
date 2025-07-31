@@ -10,9 +10,7 @@ services:
     startCommand: gunicorn backend.wsgi:application
     envVars:
       - key: DATABASE_URL
-        value: postgres://pallares_user:8IdBB3JZ6Wo0rFIrpbQSrUolk86UhHj5@dpg-d25caj7diees73aujqrg-a.oregon-postgres.render.com/mi_db_pallarescorp
-      - key: PYTHON_VERSION
-        value: 3.11
+        value: postgres://pallares_user:xxx@...render.com/mi_db_pallarescorp
       - key: DJANGO_SETTINGS_MODULE
         value: backend.settings
       - key: SECRET_KEY
