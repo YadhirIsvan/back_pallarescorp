@@ -4,11 +4,10 @@ services:
     env: python
     region: oregon
     buildCommand: |
-      cd backend
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
       python manage.py migrate
-    startCommand: cd backend && gunicorn backend.wsgi:application
+    startCommand: gunicorn backend.wsgi:application
     envVars:
       - key: DATABASE_URL
         value: postgres://pallares_user:8IdBB3JZ6Wo0rFIrpbQSrUolk86UhHj5@dpg-d25caj7diees73aujqrg-a.oregon-postgres.render.com/mi_db_pallarescorp
